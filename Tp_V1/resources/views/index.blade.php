@@ -9,7 +9,7 @@
   <title>Produits</title>
 </head>
 <body>
-  <nav class="navbar bg-dark text-light px-5 py-3  mb-5">
+  <nav class="navbar bg-dark text-light px-5 py-3  mb-5"  >
     <a class="navbar-brand text-white" href="/produits">Gestion de Produits</a>
     <a class="nav-link text-white btn btn-success" href="{{route('produits.create')}}">Create</a>
   </nav>

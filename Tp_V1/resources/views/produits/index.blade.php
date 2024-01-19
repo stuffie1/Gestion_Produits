@@ -13,9 +13,17 @@
 
 <body>
     @section("content")
+    @if(session('message_deleted'))
+    <div class="alert alert-danger w-50 mx-auto" role="alert">
+        
+        {{ session('message') }}
+      </div>
+@endif
+
     @if (!$produits)
         <div class="w-100 my-5"><h1 class="text-secondary mx-auto col-4">Theire is no Items yet</h1></div>
     @else
+    
         
     
     <table class="table mt-5 table-hover  w-75 mx-auto text-center">
@@ -31,9 +39,9 @@
                 <td class="py-3">{{ $produit['Marque'] }}</td>
                 <td class="py-3">{{ $produit['Prix'] }} DH</td>
                 <td class=" px-0 d-flex justify-content-center align-items-center">
-                    <a class=" m nav-link btn btn-info text-white me-2" href="/produits/{{$produit['Id']}}">Detaille</a>
-                    <a class="nav-link btn btn-warning text-white me-2" href="/produits/{{$produit['Id']}}/edit">Modifier</a>
-                    <form action="{{ route('produits.destroy', ['produit' => $produit['Id']]) }}" method="post" class="my-0">
+                    <a class=" m nav-link btn btn-info text-white me-2" href="/produits/{{$produit['id']}}">Detaille</a>
+                    <a class="nav-link btn btn-warning text-white me-2" href="/produits/{{$produit['id']}}/edit">Modifier</a>
+                    <form action="{{ route('produits.destroy', ['produit' => $produit->id]) }}" method="post" class="my-0">
                         @csrf
                         @method('DELETE')
                         <button class="btn btn-danger py-2 " type="submit">Delete</button>

@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\ProduitsStoreRequest;
+use App\Models\Produit;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rules\Unique;
 
 class GestionProduitsController extends Controller
@@ -14,8 +16,11 @@ class GestionProduitsController extends Controller
      */
     public function index()
     {   
-        $produits = session('produits',[]); 
+        $produits = Produit::get(); 
         // dd($produits);
+        if ($produits->isEmpty()) {
+            return view('produits.index', ['produits' => null]);
+        }
         return view('produits.index',['produits'=>$produits]);
     }
 
@@ -24,7 +29,7 @@ class GestionProduitsController extends Controller
      */
     public function create()
     {
- 
+        
         return view('produits.create');
     }
 
@@ -33,18 +38,22 @@ class GestionProduitsController extends Controller
      */
     public function store(ProduitsStoreRequest $request)
     {
-        $produits = session('produits',[]);
-        array_push($produits,[
-            'Id'=>uniqid(),
-            'Libelle' => $request->libelle,
-            'Marque' => $request->marque,
-            'Prix' => $request->prix,
-            'Stock' => $request->stock,
-            'Image' => $request->file('image')->store('ProduitsImages','local'),
-        ]);
-        session(['produits' => $produits]);
+     
+        //  $request->image=$request->file('image')->store('ProduitsImages','public');
+         $produit=[
+            'Libelle'=>$request->libelle,
+            'Marque'=>$request->marque,
+            'Prix'=>$request->prix,
+            'Stock'=>$request->stock,
+            'Image'=>$request->hasFile('image')?$request->file('image')->store('images','public'):null,
+         ];
+        // dd($produit);
+            $produits = Produit::create($produit);
+            $last=Produit::latest()->first();
+            return redirect()->route('produits.show',['produit'=>$last->id])->with('message_created',"the produit  created successfuly");
+
         
-        return redirect('/produits');
+        
         // dd($request->file('image')->store('ProduitsImages','public'));
     }
 
@@ -53,16 +62,12 @@ class GestionProduitsController extends Controller
      */
     public function show( $id)
     {
-        $produits=session('produits',[]);
-        foreach($produits as $produit){
-             if($produit['Id']==$id){
-                $infoproduit=$produit;
-                return view("produits.show",['id'=>$id,'produit'=>$infoproduit]);
-             }
-             // dd($id);
-             
-            }
-            return view('produits.error');
+        $produit=Produit::find($id);
+        if($produit){
+
+            return view('produits.show',compact('produit'));
+        }
+        return view('produits.error');
     }
 
     /**
@@ -70,8 +75,12 @@ class GestionProduitsController extends Controller
      */
     public function edit(string $id)
     {
-        $produits = session('produits',[]); 
-        return view('produits.edit',compact('produits','id'));
+        $produit=Produit::find($id);
+        if($produit){
+
+            return view('produits.edit',compact('produit'));
+        }
+        return view('produits.error');
     }
 
     /**
@@ -79,22 +88,20 @@ class GestionProduitsController extends Controller
      */
     public function update(ProduitsStoreRequest $request,  $id)
     {
-        $produits = session('produits',[]);
-        foreach($produits as $key => $produit){
-             if($produit['Id']==$id){
-
-                 $produits[$key]=[
-                     'Id'=>$id,
-                     'Libelle' => $request->libelle,
-                     'Marque' => $request->marque,
-                     'Prix' => $request->prix,
-                     'Stock' => $request->stock,
-                     'Image' => $request->file('image')->store('ProduitsImages','local'),
-                 ];
-             }
+        $produit=Produit::find($id);
+        if(!$produit){
+            return view('produits.error');
+ 
         }
-        session(['produits' => $produits]);
-        return redirect('/produits');
+        $produitedit=[
+            'Libelle'=>$request->libelle,
+            'Marque'=>$request->marque,
+            'Prix'=>$request->prix,
+            'Stock'=>$request->stock,
+            'Image'=>$request->hasFile('image')? $request->file('image')->store('images','public'):$request->old_image,
+         ];
+        $produit->update($produitedit);
+        return redirect()->route('produits.show',['produit'=>$id])->with('message_updated',"the produit updated successfuly");
     }
 
     /**
@@ -102,18 +109,12 @@ class GestionProduitsController extends Controller
      */
     public function destroy( $id)
     {
-       $produits = session('produits', []);
-
-        foreach ($produits as $key => $produit) {
-            if ($produit['Id'] == $id) {
-                unset($produits[$key]);
-                break;
-            }
+       $produit = Produit::find($id);
+       if ($produit){
+           $produit->delete($id);
+           return redirect()->route('produits.index')->with('message_deleted',"the produit deleted successfuly");
         }
         
 
-        session(['produits'=>$produits]);
-        // dd($produits);
-        return redirect('/produits');
     }
 }
