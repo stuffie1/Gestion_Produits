@@ -11,11 +11,10 @@
 </head>
 <body>
   @section('content')
-  @foreach ($produits as $produit)
-  @if ($produit['Id']==$id)
+  
     
  
-  <form action="{{route('produits.update',['produit'=>$produit['Id']])}}" method="post" class="w-50 p-5 mx-auto bg-dark text-light mt-5 " style="border-radius: 20px" enctype="multipart/form-data">
+  <form action="{{route('produits.update',['produit'=>$produit['id']])}}" method="post" class="w-50 p-5 mx-auto bg-dark text-light mt-5 " style="border-radius: 20px" enctype="multipart/form-data">
     {{csrf_field()}}
     @method('PUT')
     <div class="mb-3">
@@ -48,7 +47,8 @@
     </div>
     <div class="mb-3">
       <label for="image" class="form-label">Image</label>
-      <input type="file" class="form-control" name="image" value="{{old('image',$produit['Image'])}}">
+      <input type="file" class="form-control" name="image" >
+      <input type="hidden" class="form-control" name="old_image" value="{{$produit['Image']}}">
       @error("image")
         <p style="color:red">{{$message}}</p>
       @enderror
@@ -57,9 +57,7 @@
   
    <div class="text-center"><button type="submit" class="btn btn-success">Update</button></div>
   </form>
-     @break
-     @endif
-  @endforeach
+
   @endsection
 </body>
 </html>
